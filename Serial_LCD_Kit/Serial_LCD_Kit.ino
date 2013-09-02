@@ -153,7 +153,9 @@ void loop()
         // Wait for the next character
         while(Serial.available() == 0)
           ;
-        setBaudRate(Serial.read());
+        uint8_t baud = Serial.read();
+        setBaudRate(baud);
+        saveBaudRate(baud);
       }
       // backspace
       else if (inKey == 8)
@@ -347,7 +349,7 @@ void setBacklight(uint8_t backlightSetting)
   is out of bounds 10<baud<255, no action is taken.
   ----------------------------------------------------------*/
 void setBaudRate(uint8_t baudSetting)
-{
+{   
   // If EEPROM is unwritten (0xFF), set it to 9600 by default
   if (baudSetting==255)
     baudSetting = 4;
@@ -388,6 +390,15 @@ void setBaudRate(uint8_t baudSetting)
       Serial.begin(115200);
       break;
   }
+}
+
+/* ----------------------------------------------------------
+  saveBaudRate() is called from SpecialCommands(). It receives
+  a baud rate setting value that should be between 0 and 10.
+  The value is written to EEPROM.
+  ----------------------------------------------------------*/
+void saveBaudRate(uint8_t baudSetting)
+{
   if ((baudSetting>=0)&&(baudSetting<=10))
     EEPROM.write(BAUD_ADDRESS, baudSetting);
 }
