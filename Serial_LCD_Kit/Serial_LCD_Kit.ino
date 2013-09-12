@@ -48,6 +48,7 @@
 #define BACKLIGHT_COMMAND 128  // 0x80
 #define SPECIAL_COMMAND 254 // 0xFE
 #define BAUD_COMMAND 129  // 0x81
+#define ANALOG_COMMAND 130 // 0x82
 
 // --- ARDUINO PIN DEFINITIONS
 uint8_t RSPin = 2;
@@ -156,6 +157,28 @@ void loop()
         uint8_t baud = Serial.read();
         setBaudRate(baud);
         saveBaudRate(baud);
+      }
+      else if ((inKey&0xFF) == ANALOG_COMMAND)
+      {
+        while(Serial.available() == 0)
+          ;
+        
+        uint8_t port = Serial.read();
+        if(port < 1 || port > 21){
+          Serial.write(-1);
+          continue;
+        }
+        
+        if(port > 0 && port < 6) {
+          // port is pin 1-5
+          Serial.print(analogRead(port) * 0.0048875);
+          Serial.print("\r");
+        }
+        else {
+          // port goes through the mux
+          // not implemented yet
+          Serial.write(0);
+        }
       }
       // backspace
       else if (inKey == 8)
